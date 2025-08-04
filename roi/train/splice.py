@@ -18,7 +18,7 @@ def extract_frames(video_path, output_dir):
         if not ret:
             break
 
-        if frame_count % 5 == 0:
+        if frame_count % 2 == 0:
             frame_filename = os.path.join(output_dir, f"{os.path.basename(video_path)}_frame_{frame_count}.jpg")
             cv2.imwrite(frame_filename, frame)
             saved_count += 1
@@ -29,8 +29,8 @@ def extract_frames(video_path, output_dir):
     print(f"Extracted {saved_count} frames from {os.path.basename(video_path)}.")
 
 
-video_root = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/data/roi_video"
-photo_root = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/data/roi_frames"
+video_root = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/roi_video"
+photo_root = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/roi_frames_2"
 video_extensions = ('.mp4')
 
 
