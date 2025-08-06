@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 2
+names: ['ball', 'pitcher']
+
+roboflow:
+  workspace: fracture-pcnbk
+  project: pitch-id-roi-hts2i
+  version: 8
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/fracture-pcnbk/pitch-id-roi-hts2i/dataset/8

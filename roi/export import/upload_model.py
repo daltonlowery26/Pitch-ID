@@ -12,10 +12,10 @@ robo_api = os.getenv("ROBO_API")
 
 rf = Roboflow(api_key=robo_api)
 workspace = rf.workspace("fracture-pcnbk").project("pitch-id-roi-hts2i")
-workspace_one = workspace.version(3)
+workspace_one = workspace.version(5)
 
 workspace_one.deploy(
   model_type="yolov8",
-  model_path="C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/models/train/",
-  filename="C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/models/train/weights/best.pt"
+  model_path="C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/runs/detect/train8/",
+  filename="C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/runs/detect/train8/weights/best.pt"
 )
