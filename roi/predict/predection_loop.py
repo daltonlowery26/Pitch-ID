@@ -6,7 +6,7 @@ import pandas as pd
 os.chdir('C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/')
 
 def pred_loop(video_path):
-    model = YOLO('runs/detect/train8/weights/best.pt')
+    model = YOLO('runs/detect/train12/weights/best.pt')
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         print("Error: Could not open video.")
@@ -37,7 +37,7 @@ def pred_loop(video_path):
                     print(f"Ball first recognized at: {timestamp_s:.2f} seconds")
                     
                     cap.release()
-                    return timestamp_s
+                    return timestamp_s, confidence
                 
 
 if __name__ == '__main__':
@@ -48,6 +48,5 @@ if __name__ == '__main__':
         time = pred_loop(search)
         data = {'file': path, 'time': time}
         release.append(data)
-    print(release)
     df = pd.DataFrame(release)
-    df.to_csv('testing.csv')
+    df.to_csv('testing3.csv')
