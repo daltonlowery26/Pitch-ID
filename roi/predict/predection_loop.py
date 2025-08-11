@@ -6,7 +6,7 @@ import pandas as pd
 os.chdir('C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/')
 
 def pred_loop(video_path):
-    model = YOLO('runs/detect/train12/weights/best.pt')
+    model = YOLO('runs/detect/train_colab/weights/best.pt')
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         print("Error: Could not open video.")
@@ -18,7 +18,7 @@ def pred_loop(video_path):
         if not success:
             break
         if success:
-            target_size = (736, 736)
+            target_size = (1024, 1024)
             resized_frame = cv2.resize(frame, target_size, interpolation=cv2.INTER_LINEAR)
             frame = resized_frame
 
@@ -31,7 +31,7 @@ def pred_loop(video_path):
             class_name = model.names[class_id]
 
             if class_name.lower() == 'ball':
-                if not ball_first_appearance and confidence > 0.4:
+                if not ball_first_appearance and confidence > 0.5:
                     timestamp_ms = cap.get(cv2.CAP_PROP_POS_MSEC)
                     timestamp_s = timestamp_ms / 1000
                     print(f"Ball first recognized at: {timestamp_s:.2f} seconds")
@@ -41,7 +41,7 @@ def pred_loop(video_path):
                 
 
 if __name__ == '__main__':
-    elite_dir = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/testing/"
+    elite_dir = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/cut_test/"
     release = []
     for path in os.listdir(elite_dir):
         search = os.path.join(elite_dir, path)
@@ -49,4 +49,4 @@ if __name__ == '__main__':
         data = {'file': path, 'time': time}
         release.append(data)
     df = pd.DataFrame(release)
-    df.to_csv('testing3.csv')
+    df.to_csv('testing2.csv')

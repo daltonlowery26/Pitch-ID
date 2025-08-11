@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 import os
 
 def extract_frames(video_path, output_dir):
@@ -18,19 +19,21 @@ def extract_frames(video_path, output_dir):
         if not ret:
             break
 
-        if frame_count % 10 == 0:
-            frame_filename = os.path.join(output_dir, f"{os.path.basename(video_path)}_frame_{frame_count}.jpg")
+        if frame_count % 3 == 0:
+            rnd = np.random.randint(0, 100000)
+            frame_filename = os.path.join(output_dir, f"{os.path.basename(video_path)}_frame_{frame_count}{rnd}.jpg")
             cv2.imwrite(frame_filename, frame)
             saved_count += 1
+        else:
+            frame_count += 1
 
-        frame_count += 1
 
     cap.release()
     print(f"Extracted {saved_count} frames from {os.path.basename(video_path)}.")
 
 
-video_root = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/labeling sets/video/full_videos"
-photo_root = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/labeling sets/full_frames"
+video_root = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/labeling sets/video/LHB"
+photo_root = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/labeling sets/LHB_frames"
 video_extensions = ('.mp4')
 
 
