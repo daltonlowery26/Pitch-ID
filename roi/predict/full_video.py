@@ -47,12 +47,11 @@ def pred_loop(video_path):
                     timestamp_ms = cap.get(cv2.CAP_PROP_POS_MSEC)
                     print(f"Ball recognized at: {timestamp_ms:.2f} seconds")
 
-                    video_end = timestamp_ms + 4500
+                    video_end = timestamp_ms + 3500
                     video_add = {'video':video_count, 'release': timestamp_ms / 1000, 'video_start': timestamp_ms - 1000, 'video_end': video_end}
                     video_intervals.append(video_add)
 
                     frame_count = int((video_end / 1000) * frame_rate)
-                    cv2.imshow(frame)
                     ball_detected = True
                     break
                     
@@ -64,8 +63,8 @@ def pred_loop(video_path):
   
 
 if __name__ == '__main__':
-    video_dir = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/full_length_test/fresh_test.mp4"
+    video_dir = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/full_length_test/pitcher2.mp4"
     df = pred_loop(video_dir)
     results = pd.DataFrame(df)
-    results.to_csv('testinglong.csv')
+    results.to_csv('jose.csv')
     
