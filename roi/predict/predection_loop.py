@@ -6,7 +6,7 @@ import pandas as pd
 os.chdir('C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/')
 
 def pred_loop(video_path):
-    model = YOLO('runs/detect/train_colab/weights/best.pt')
+    model = YOLO('runs/detect/train_colab3/weights/best.pt')
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         print("Error: Could not open video.")

@@ -8,7 +8,7 @@ import numpy as np
 os.chdir('C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/')
 
 def pred_loop(video_path):
-    model = YOLO('runs/detect/train_colab2/weights/best.pt')
+    model = YOLO('runs/detect/train_colab4/weights/best.pt')
     cap = cv2.VideoCapture(video_path)
     video_intervals = []
     times = []
@@ -32,7 +32,7 @@ def pred_loop(video_path):
             break
 
         if success:
-            target_size = (1024, 1024)
+            target_size = (512, 512)
             resized_frame = cv2.resize(frame, target_size, interpolation=cv2.INTER_LINEAR)
             frame = resized_frame
 
