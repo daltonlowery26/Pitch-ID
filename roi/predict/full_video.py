@@ -2,13 +2,16 @@ from ultralytics import YOLO
 import os
 import cv2
 import pandas as pd
+import time
+import numpy as np
 
 os.chdir('C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/')
 
 def pred_loop(video_path):
-    model = YOLO('runs/detect/train_colab/weights/best.pt')
+    model = YOLO('runs/detect/train_colab2/weights/best.pt')
     cap = cv2.VideoCapture(video_path)
     video_intervals = []
+    times = []
 
     if not cap.isOpened():
         print("Error: Could not open video.")
@@ -33,7 +36,12 @@ def pred_loop(video_path):
             resized_frame = cv2.resize(frame, target_size, interpolation=cv2.INTER_LINEAR)
             frame = resized_frame
 
+        timestart = time.time()
         results = model(frame, device = 0, verbose = False)
+        timeend = time.time()
+        diff = timeend - timestart
+        times.append(diff)
+
         results = results[0]
         ball_detected = False
 
@@ -59,11 +67,12 @@ def pred_loop(video_path):
             frame_count += 1
 
     cap.release()
+    print(np.mean(times))
     return video_intervals
   
 
 if __name__ == '__main__':
-    video_dir = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/full_length_test/pitcher2.mp4"
+    video_dir = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/full_length_test/pitcher2_splice.mp4"
     df = pred_loop(video_dir)
     results = pd.DataFrame(df)
     results.to_csv('jose.csv')
