@@ -1,3 +1,4 @@
+### all training was done on google colab, this is just the model training loop
 from ultralytics import YOLO
 from ultralytics.data.dataset import YOLODataset
 import ultralytics.data.build as build
@@ -52,26 +53,28 @@ class YOLOWeightedDataset(YOLODataset):
 
 
 
-
 if __name__ == '__main__': # so though a conflict isnt caused with pytorch
-    
+
     # specify to use weighted dataset
     build.YOLODataset = YOLOWeightedDataset
 
     # data
-    data_yaml = 'C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/Pitch-ID-ROI-8/data.yaml'
+    data_yaml = '/content/Pitch-ID-ROI-14/data.yaml'
 
     # model
-    model = YOLO("yolov8m.pt")
+    model = YOLO("yolov8n.pt")
 
     # model results
     results = model.train(
     data=data_yaml,
-    imgsz=736,
-    epochs=500,  
-    patience=20,    
-    batch = 8,       
+    imgsz=512,
+    epochs=500,
+    patience=15,
+    batch = .7,
     device= 0,
-    workers = 2,
-    optimizer= 'AdamW'
+    cos_lr = False,
+    weight_decay = 0.0001,
+    lr0=0.001,
+    workers = 6,
+    optimizer= 'NAdam'
     )

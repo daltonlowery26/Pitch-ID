@@ -32,8 +32,8 @@ def extract_frames(video_path, output_dir):
     print(f"Extracted {saved_count} frames from {os.path.basename(video_path)}.")
 
 
-video_root = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/labeling sets/video/psu_video/"
-photo_root = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/labeling sets/psu_frames"
+video_root = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/labeling sets/video/processed/"
+photo_root = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/labeling sets/831_frames"
 video_extensions = ('.mp4')
 
 
