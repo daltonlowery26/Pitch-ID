@@ -1,6 +1,7 @@
 # packages
 from ultralytics import YOLO
 import os
+import ffmpeg
 import cv2
 from multiprocessing import Pool
 from pathlib import Path
@@ -11,7 +12,7 @@ import numpy as np
 os.chdir('C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/')
 
 # define model
-model = YOLO('runs/detect/train_colab6/weights/best.pt', task='predict') 
+model = YOLO('runs/detect/train_colab6/weights/best.pt') 
 
 # resize the frame using padding
 def frame_resize(frame, target_size):
@@ -36,8 +37,10 @@ def frame_resize(frame, target_size):
 
 # process the video
 def process_segment(args):
+    # define as args so easier to map pool processes
     video_path, start_frame, end_frame = args
-    
+
+    # video object 
     cap = cv2.VideoCapture(video_path)
 
     if not cap.isOpened():
@@ -65,6 +68,8 @@ def process_segment(args):
             class_id = int(box.cls[0])
             confidence = float(box.conf[0])
             class_name = model.names[class_id]
+            
+            # default values in case inference does not work
             midpoint = np.nan, np.nan
             release_cords = np.nan, np.nan
 
@@ -102,7 +107,7 @@ def process_segment(args):
                 
                 # video end and jump
                 video_jump = timestamp_ms + 3800
-                video_end_ms = timestamp_ms + 2000
+                video_end_ms = timestamp_ms + 4000
 
                 # video info
                 video_add = {
@@ -115,8 +120,8 @@ def process_segment(args):
                 video_intervals.append(video_add)
                 
                 # jump forward to a new frame
-                new_frame_count = int((video_end_ms / 1000) * frame_rate)
-                frame_count = min(new_frame_count, end_frame)
+                new_frame_count = int((video_jump / 1000) * frame_rate)
+                frame_count = new_frame_count
                 ball_detected = True
                 break
         
@@ -165,7 +170,7 @@ def tunneling(release):
     df = release
     
     # extract info from release
-    tunnel_points = df['tunnel_point'].str.strip('()').str.split(',')
+    tunnel_points = df['tunnel_point'].astype(str).str.strip('()').str.split(',')
     tunnel_points = [tuple(map(float, map(str.strip, point))) for point in tunnel_points]
     video_numbers = df['video'].tolist()
     release_points = df['release_point'].tolist()
@@ -219,8 +224,8 @@ def tunneling(release):
     return closest_results
 
 # splice video at start and end
-def video_splice(source_vid, release, root):
-    df = pd.read_csv(release)
+def video_splice(source_vid, release, root, fps):
+    df = release
 
     # video base
     base = Path(source_vid)
@@ -239,7 +244,6 @@ def video_splice(source_vid, release, root):
         num = row['video']
 
         # video info 
-        fps = int(cap.get(cv2.CAP_PROP_FPS))
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
@@ -276,7 +280,7 @@ def video_splice(source_vid, release, root):
     export.to_csv(os.path.join(output_dir, "pairs.csv"))
 
 # parallel processing
-def process_video_parallel(video_path, video_output):
+def process_video_parallel(video_path, fps, video_output):
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         print("Could not open video.")
@@ -309,6 +313,7 @@ def process_video_parallel(video_path, video_output):
     
     # change to pd 
     release_df = pd.DataFrame(sorted_intervals)
+    print(release_df)
 
     # extract frames
     print(f"Extracting Release Frames from {video_path}")
@@ -316,14 +321,16 @@ def process_video_parallel(video_path, video_output):
     
     # find tunneling pairs and create videos
     print(f"Finding Pairs and Creating Videos")
-    video_splice(source_vid=video_path, release=release_df, root=video_output)
+    video_splice(source_vid=video_path, release=release_df, fps = fps, root=video_output)
 
     return release_df
 
-# main
+# output loop
 if __name__ == '__main__':
-    video_dir = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/test_sets/full_length_test/E_Beneco.mp4"
+    video_dir = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/test_sets/full_length_test/Tennesse_8_04_f5.mp4"
     output_root = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/release_videos/"
-    df = process_video_parallel(video_path=video_dir, video_output=output_root)
+    # release = pd.read_csv("C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/release_frames/E_Beneco.csv")
+    df = process_video_parallel(video_path=video_dir, fps=30, video_output=output_root)
     csv = pd.DataFrame(df)
-    csv.to_csv('./datasets/release_frames/E_Beneco.csv')
+    csv.to_csv('./datasets/release_frames/Tennesse_8_04_f5.csv')
+    # video_splice(source_vid=video_dir, release=release, root=output_root, fps=30)
