@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 
 # set working dir
-os.chdir('C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/')
+os.chdir('C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/release')
 
 # define model
 model = YOLO('runs/detect/train_colab6/weights/best.pt') 
@@ -83,27 +83,35 @@ def process_segment(args):
                 release_x = (x1 + x2) / 2
                 release_y = (y1 + y2) / 2
                 release_cords = (int(release_x), int(release_y))
+                frame_count_release = 1
                 
-                # find location of ball at decison point
-                tunneling_time = timestamp_ms + 167
-                cap.set(cv2.CAP_PROP_POS_MSEC, tunneling_time)
-                success, frame = cap.read()
-                resized_frame = frame_resize(frame, (512,512))
-                results = model(resized_frame, device=0, verbose=False)
-                results = results[0]
+                frame_cords = []
+                while frame_count_release <= 6:
+                    # find location of ball at decison point
+                    tunneling_frame = frame_count + frame_count_release
+                    cap.set(cv2.CAP_PROP_FRAME_COUNT, tunneling_frame)
+                    success, frame = cap.read()
+                    resized_frame = frame_resize(frame, (512,512))
+                    results = model(resized_frame, device=0, verbose=False)
+                    results = results[0]
                 
-                for box in results.boxes:
-                    class_id = int(box.cls[0])
-                    confidence = float(box.conf[0])
-                    class_name = model.names[class_id]
+                    for box in results.boxes:
+                        class_id = int(box.cls[0])
+                        confidence = float(box.conf[0])
+                        class_name = model.names[class_id]
 
-                    if class_name.lower() == 'ball' and confidence > 0.30: # model has a harder time with the later frame pitches hence the lower confidence threshold
-                        x1, y1, x2, y2 = box.xyxy[0]
-                        midpoint_x = (x1 + x2) / 2
-                        midpoint_y = (y1 + y2) / 2
-                        midpoint = (int(midpoint_x), int(midpoint_y))
-                    else:
-                        continue
+                        if class_name.lower() == 'ball' and confidence > 0.30: # model has a harder time with the later frame pitches hence the lower confidence threshold
+                            x1, y1, x2, y2 = box.xyxy[0]
+                            midpoint_x = (x1 + x2) / 2
+                            midpoint_y = (y1 + y2) / 2
+                            midpoint = (int(midpoint_x), int(midpoint_y))
+                            tunnel_info = {
+                                f'midpoint{frame_count_release}':midpoint
+                            }
+                            frame_cords.append(tunnel_info)
+                        else:
+                            continue
+                    frame_count_release += 1
                 
                 # video end and jump
                 video_jump = timestamp_ms + 3800
@@ -115,7 +123,7 @@ def process_segment(args):
                     'video_start': (timestamp_ms - 2000) / 1000,
                     'video_end': video_end_ms,
                     'release_point': release_cords,
-                    'tunnel_point': midpoint
+                    'frame_cords': frame_cords
                 }
                 video_intervals.append(video_add)
                 
@@ -327,8 +335,8 @@ def process_video_parallel(video_path, fps, video_output):
 
 # output loop
 if __name__ == '__main__':
-    video_dir = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/test_sets/full_length_test/Tennesse_8_04_f5.mp4"
-    output_root = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/release_videos/"
+    video_dir = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/release/datasets/test_sets/full_length_test/Tennesse_8_04_f5.mp4"
+    output_root = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/release/datasets/release_videos/"
     # release = pd.read_csv("C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/release_frames/E_Beneco.csv")
     df = process_video_parallel(video_path=video_dir, fps=30, video_output=output_root)
     csv = pd.DataFrame(df)
