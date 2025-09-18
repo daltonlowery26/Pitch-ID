@@ -1,7 +1,6 @@
 # packages
 from ultralytics import YOLO
 import os
-import ffmpeg
 import cv2
 from multiprocessing import Pool
 from pathlib import Path
@@ -281,11 +280,11 @@ def video_splice(source_vid, release, root, fps):
             current_frame_num += 1
         cap.release()
         out.release()
-
+    # remove this functionality, going to seperate the process to another program
     # tunneling pairs
-    video_pairs = tunneling(df)
-    export = pd.DataFrame(video_pairs)
-    export.to_csv(os.path.join(output_dir, "pairs.csv"))
+    # video_pairs = tunneling(df)
+    # export = pd.DataFrame(video_pairs)
+    # export.to_csv(os.path.join(output_dir, "pairs.csv"))
 
 # parallel processing
 def process_video_parallel(video_path, fps, video_output):
@@ -337,8 +336,10 @@ def process_video_parallel(video_path, fps, video_output):
 if __name__ == '__main__':
     video_dir = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/release/datasets/test_sets/full_length_test/Tennesse_8_04_f5.mp4"
     output_root = "C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/release/datasets/release_videos/"
-    # release = pd.read_csv("C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/release_frames/E_Beneco.csv")
+
     df = process_video_parallel(video_path=video_dir, fps=30, video_output=output_root)
     csv = pd.DataFrame(df)
     csv.to_csv('./datasets/release_frames/Tennesse_8_04_f5.csv')
+
+    # release = pd.read_csv("C:/Users/dalto/OneDrive/Pictures/Documents/Projects/Coding Projects/Pitch ID Model/datasets/release_frames/E_Beneco.csv")
     # video_splice(source_vid=video_dir, release=release, root=output_root, fps=30)
