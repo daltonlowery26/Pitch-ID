@@ -52,8 +52,8 @@ def process_segment(args):
                 return []
 
             frame_count = 0
-
-            while frame_count < int(cap.get(cv2.CAP_PROP_FRAME_COUNT)):
+            video_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            while frame_count < video_frames:
                 cap.set(cv2.CAP_PROP_POS_FRAMES, frame_count)
                 success, frame = cap.read()
 
@@ -72,12 +72,11 @@ def process_segment(args):
                     
                     # default values in case inference does not work
                     midpoint = np.nan, np.nan
-                    release_cords = np.nan, np.nan
 
                     if class_name.lower() == 'ball' and confidence > 0.4:
                         # time of release
                         timestamp_ms = cap.get(cv2.CAP_PROP_POS_MSEC)
-                        print(f"Ball recognized at: {timestamp_ms / 1000:.2f} seconds (from seg starting at frame {start_frame})")
+                        print(f"Ball recognized at: {timestamp_ms / 1000:.2f}")
                         
                         # release cords
                         x1, y1, x2, y2 = box.xyxy[0]
@@ -87,21 +86,28 @@ def process_segment(args):
                         frame_count_release = 1
                         
                         frame_cords = []
-                        while frame_count_release <= 8:
-                            # find location of ball at decison point
+                        ball_detected_count = 0 
+
+                        while frame_count_release <= 8 and ball_detected_count < 8:
+
+                            # find location of ball at decision point
                             tunneling_frame = frame_count + frame_count_release
-                            cap.set(cv2.CAP_PROP_FRAME_COUNT, tunneling_frame)
+                            cap.set(cv2.CAP_PROP_POS_FRAMES, tunneling_frame) 
                             success, frame = cap.read()
+                            if not success:
+                                break
+                                
                             resized_frame = frame_resize(frame, (512,512))
                             results = model(resized_frame, device=0, verbose=False)
                             results = results[0]
-                        
+                            
+                            ball_found = False
                             for box in results.boxes:
                                 class_id = int(box.cls[0])
                                 confidence = float(box.conf[0])
                                 class_name = model.names[class_id]
 
-                                if class_name.lower() == 'ball' and confidence > 0.30: # model has a harder time with the later frame pitches hence the lower confidence threshold
+                                if class_name.lower() == 'ball' and confidence > 0.30:
                                     x1, y1, x2, y2 = box.xyxy[0]
                                     midpoint_x = (x1 + x2) / 2
                                     midpoint_y = (y1 + y2) / 2
@@ -110,8 +116,16 @@ def process_segment(args):
                                         f'midpoint{frame_count_release}':midpoint
                                     }
                                     frame_cords.append(tunnel_info)
-                                else:
-                                    continue
+                                    ball_detected_count += 1
+                                    ball_found = True
+                                    break
+                            
+                            if not ball_found:
+                                tunnel_info = {
+                                    f'midpoint{frame_count_release}': (np.nan, np.nan)
+                                }
+                                frame_cords.append(tunnel_info)
+                            
                             frame_count_release += 1
 
                         data = {
@@ -119,9 +133,12 @@ def process_segment(args):
                             'ball cords': frame_cords
                             }
                         
-                        export.append(data)
-                        frame_count = 1000000 # break main while loop because using spliced video
+                        export.append(data) # break main while loop because using spliced video
+                        frame_count = float('inf')
                         break
+                    else:
+                        frame_count += 1
+                        continue
     # export pd
     ex_pd = pd.DataFrame(export)
     ex_pd.to_csv('locations.csv')
